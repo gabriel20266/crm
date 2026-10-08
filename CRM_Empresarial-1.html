@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Empresarial</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f6f8;color:#1f2937}
+header{background:#0f3d56;color:white;padding:16px}.top{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:10px}
+h1,h2,h3{margin-top:0}.brand{font-size:21px;font-weight:bold}.wrap{max-width:1200px;margin:auto;padding:18px}
+nav{display:flex;gap:7px;overflow:auto;margin:12px 0}button,.btn{border:0;border-radius:7px;padding:10px 13px;cursor:pointer;font-weight:bold;background:#0f3d56;color:white}
+nav button{background:white;color:#0f3d56;border:1px solid #d8dee4}.danger{background:#b42318}.success{background:#087443}.warning{background:#a15c00}
+section{display:none}.active{display:block}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:white;border-radius:10px;padding:16px;box-shadow:0 2px 8px #0000000d}.num{font-size:27px;font-weight:bold;margin-top:8px}
+table{width:100%;border-collapse:collapse;background:white}.tablewrap{overflow:auto}.tablewrap table{min-width:700px}th,td{padding:11px;border-bottom:1px solid #eee;text-align:left}th{background:#eef3f6}
+input,select,textarea{width:100%;padding:10px;border:1px solid #ccd3d8;border-radius:7px;margin:5px 0 12px;background:white}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full{grid-column:1/-1}.actions{display:flex;gap:6px;flex-wrap:wrap}
+.badge{padding:5px 8px;border-radius:20px;font-size:12px;font-weight:bold}.ok{background:#d9f5e6;color:#087443}.near{background:#fff0c7;color:#8a5500}.expired{background:#fde1df;color:#a51b12}
+.search{margin-bottom:12px}.muted{color:#667085;font-size:13px}.report{padding:25px;background:white}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}.wrap{padding:12px}}
+@media(max-width:450px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+@media print{header,nav,.no-print{display:none!important}body{background:white}.wrap{padding:0}.report{box-shadow:none}}
+</style>
+</head>
+<body>
+<header><div class="top"><div class="brand">🏢 CRM Empresarial</div><div id="companyHeader">Gestão documental e empresarial</div></div></header>
+
+<div class="wrap">
+<nav class="no-print">
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('empresa')">Empresa</button>
+<button onclick="show('funcionarios')">Funcionários</button>
+<button onclick="show('documentos')">Documentos</button>
+<button onclick="show('setores')">Setores</button>
+<button onclick="show('relatorios')">Relatórios</button>
+</nav>
+
+<section id="dashboard" class="active">
+<h2>Dashboard</h2>
+<div class="grid">
+<div class="card">Empresas<div class="num" id="nEmp">0</div></div>
+<div class="card">Funcionários<div class="num" id="nFunc">0</div></div>
+<div class="card">Documentos<div class="num" id="nDoc">0</div></div>
+<div class="card">Vencidos<div class="num" id="nExp">0</div></div>
+</div>
+<br><div class="card"><h3>⚠️ Documentos que exigem atenção</h3><div id="alerts"></div></div>
+</section>
+
+<section id="empresa">
+<h2>Cadastro da Empresa</h2>
+<div class="card">
+<div class="formgrid">
+<div><label>Nome da empresa</label><input id="eNome"></div>
+<div><label>NIF</label><input id="eNif"></div>
+<div><label>Telefone</label><input id="eTel"></div>
+<div><label>Email</label><input id="eEmail"></div>
+<div><label>Província</label><input id="eProv"></div>
+<div><label>Endereço</label><input id="eEnd"></div>
+</div>
+<button class="success" onclick="saveEmpresa()">Guardar empresa</button>
+</div>
+<br><div class="card"><h3>Empresas registadas</h3><div class="tablewrap"><table><thead><tr><th>Empresa</th><th>NIF</th><th>Telefone</th><th>Província</th></tr></thead><tbody id="empTable"></tbody></table></div></div>
+</section>
+
+<section id="funcionarios">
+<h2>Funcionários</h2>
+<div class="card"><div class="formgrid">
+<div><label>Nome completo</label><input id="fNome"></div>
+<div><label>Nº/ID funcionário</label><input id="fId"></div>
+<div><label>Cargo</label><input id="fCargo"></div>
+<div><label>Setor</label><select id="fSetor"></select></div>
+<div><label>Telefone</label><input id="fTel"></div>
+<div><label>Data de admissão</label><input type="date" id="fData"></div>
+</div><button class="success" onclick="saveFunc()">Adicionar funcionário</button></div>
+<br><input class="search" placeholder="Pesquisar funcionário..." oninput="renderFuncs(this.value)">
+<div class="tablewrap"><table><thead><tr><th>Nome</th><th>ID</th><th>Cargo</th><th>Setor</th><th>Telefone</th><th>Ação</th></tr></thead><tbody id="funcTable"></tbody></table></div>
+</section>
+
+<section id="documentos">
+<h2>Documentos e Validades</h2>
+<div class="card"><div class="formgrid">
+<div><label>Documento</label><input id="dNome" placeholder="Ex.: Alvará, contrato, licença"></div>
+<div><label>Categoria</label><select id="dCat"><option>Empresa</option><option>Funcionário</option><option>Imposto</option><option>Renda</option><option>Contrato</option><option>Licença</option><option>Outro</option></select></div>
+<div><label>Responsável/funcionário</label><input id="dResp"></div>
+<div><label>Data de emissão</label><input type="date" id="dEmissao"></div>
+<div><label>Data de validade</label><input type="date" id="dVal"></div>
+<div><label>Observação</label><input id="dObs"></div>
+<div class="full"><label>Arquivo (protótipo: nome/local do arquivo)</label><input type="file" id="dFile" accept=".pdf,.jpg,.jpeg,.png"></div>
+</div><button class="success" onclick="saveDoc()">Registar documento</button></div>
+<br><input class="search" placeholder="Pesquisar documento..." oninput="renderDocs(this.value)">
+<div class="tablewrap"><table><thead><tr><th>Documento</th><th>Categoria</th><th>Responsável</th><th>Validade</th><th>Estado</th><th>Ação</th></tr></thead><tbody id="docTable"></tbody></table></div>
+</section>
+
+<section id="setores">
+<h2>Setores</h2>
+<div class="card"><input id="sNome" placeholder="Nome do setor"><button class="success" onclick="saveSetor()">Adicionar setor</button></div>
+<br><div class="tablewrap"><table><thead><tr><th>Setor</th><th>Funcionários</th><th>Ação</th></tr></thead><tbody id="setTable"></tbody></table></div>
+</section>
+
+<section id="relatorios">
+<div class="report">
+<h2>Relatórios</h2>
+<p class="muted">Selecione o tipo de relatório. Use "Imprimir / PDF" e, no telefone, escolha "Guardar como PDF".</p>
+<div class="actions no-print">
+<button onclick="reportGeral()">Relatório geral</button>
+<button onclick="reportDocs()">Relatório de documentos</button>
+<button onclick="reportFuncs()">Relatório de funcionários</button>
+<button onclick="window.print()">🖨️ Imprimir / PDF</button>
+</div><hr><div id="reportContent"></div>
+</div>
+</section>
+</div>
+
+<script>
+const key='crm_empresarial_v1';
+let db=JSON.parse(localStorage.getItem(key)||'{"empresas":[],"funcionarios":[],"documentos":[],"setores":["Administrativo","Financeiro","Recursos Humanos","Operacional"]}');
+function save(){localStorage.setItem(key,JSON.stringify(db));renderAll()}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function show(id){document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');renderAll()}
+function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function status(date){
+ if(!date)return ['Sem data','near'];
+ let today=new Date();today.setHours(0,0,0,0), d=new Date(date+'T00:00:00');
+ let days=Math.ceil((d-today)/86400000);
+ if(days<0)return ['Vencido','expired']; if(days<=30)return ['Próximo','near']; return ['Válido','ok'];
+}
+function saveEmpresa(){let nome=eNome.value.trim();if(!nome)return alert('Informe o nome da empresa.');db.empresas.push({id:uid(),nome,nif:eNif.value,tel:eTel.value,email:eEmail.value,prov:eProv.value,end:eEnd.value});save();['eNome','eNif','eTel','eEmail','eProv','eEnd'].forEach(x=>document.getElementById(x).value='');alert('Empresa guardada.')}
+function saveFunc(){if(!fNome.value.trim())return alert('Informe o nome do funcionário.');db.funcionarios.push({id:uid(),nome:fNome.value,idfunc:fId.value,cargo:fCargo.value,setor:fSetor.value,tel:fTel.value,data:fData.value});save();['fNome','fId','fCargo','fTel','fData'].forEach(x=>document.getElementById(x).value='')}
+function saveDoc(){if(!dNome.value.trim())return alert('Informe o nome do documento.');let file=dFile.files[0];db.documentos.push({id:uid(),nome:dNome.value,cat:dCat.value,resp:dResp.value,emissao:dEmissao.value,val:dVal.value,obs:dObs.value,file:file?file.name:''});save();['dNome','dResp','dEmissao','dVal','dObs'].forEach(x=>document.getElementById(x).value='');dFile.value=''}
+function saveSetor(){let n=sNome.value.trim();if(!n)return;if(!db.setores.includes(n))db.setores.push(n);sNome.value='';save()}
+function del(type,id){if(!confirm('Eliminar este registo?'))return;db[type]=db[type].filter(x=>x.id!==id);save()}
+function renderAll(){nEmp.textContent=db.empresas.length;nFunc.textContent=db.funcionarios.length;nDoc.textContent=db.documentos.length;nExp.textContent=db.documentos.filter(x=>status(x.val)[1]=='expired').length;renderEmp();renderFuncs();renderDocs();renderSet();renderAlerts();fSetor.innerHTML=db.setores.map(x=>`<option>${esc(x)}</option>`).join('')}
+function renderEmp(){empTable.innerHTML=db.empresas.map(x=>`<tr><td>${esc(x.nome)}</td><td>${esc(x.nif)}</td><td>${esc(x.tel)}</td><td>${esc(x.prov)}</td></tr>`).join('')||'<tr><td colspan="4">Nenhuma empresa.</td></tr>'}
+function renderFuncs(q=''){q=q.toLowerCase();funcTable.innerHTML=db.funcionarios.filter(x=>(x.nome+' '+x.cargo+' '+x.setor).toLowerCase().includes(q)).map(x=>`<tr><td>${esc(x.nome)}</td><td>${esc(x.idfunc)}</td><td>${esc(x.cargo)}</td><td>${esc(x.setor)}</td><td>${esc(x.tel)}</td><td><button class="danger" onclick="del('funcionarios','${x.id}')">Eliminar</button></td></tr>`).join('')||'<tr><td colspan="6">Nenhum funcionário.</td></tr>'}
+function renderDocs(q=''){q=q.toLowerCase();docTable.innerHTML=db.documentos.filter(x=>(x.nome+' '+x.cat+' '+x.resp).toLowerCase().includes(q)).map(x=>{let s=status(x.val);return `<tr><td>${esc(x.nome)}<br><small>${esc(x.file||'Sem arquivo')}</small></td><td>${esc(x.cat)}</td><td>${esc(x.resp)}</td><td>${esc(x.val||'-')}</td><td><span class="badge ${s[1]}">${s[0]}</span></td><td><button class="danger" onclick="del('documentos','${x.id}')">Eliminar</button></td></tr>`}).join('')||'<tr><td colspan="6">Nenhum documento.</td></tr>'}
+function renderSet(){setTable.innerHTML=db.setores.map(s=>`<tr><td>${esc(s)}</td><td>${db.funcionarios.filter(f=>f.setor===s).length}</td><td><button class="danger" onclick="removeSet('${esc(s)}')">Eliminar</button></td></tr>`).join('')}
+function removeSet(s){if(db.funcionarios.some(f=>f.setor===s))return alert('Não elimine um setor que possui funcionários.');db.setores=db.setores.filter(x=>x!==s);save()}
+function renderAlerts(){let a=db.documentos.filter(x=>status(x.val)[1]!=='ok');alerts.innerHTML=a.length?a.map(x=>{let s=status(x.val);return `<p>⚠️ <b>${esc(x.nome)}</b> — ${esc(x.val||'sem validade')} — <span class="badge ${s[1]}">${s[0]}</span></p>`}).join(''):'<p>✅ Nenhum documento vencido ou próximo do vencimento.</p>'}
+function reportGeral(){reportContent.innerHTML=`<h2>Relatório Geral</h2><p><b>Empresas:</b> ${db.empresas.length}</p><p><b>Funcionários:</b> ${db.funcionarios.length}</p><p><b>Documentos:</b> ${db.documentos.length}</p><p><b>Vencidos:</b> ${db.documentos.filter(x=>status(x.val)[1]=='expired').length}</p><p><b>Próximos do vencimento:</b> ${db.documentos.filter(x=>status(x.val)[1]=='near').length}</p><h3>Setores</h3><ul>${db.setores.map(s=>`<li>${esc(s)} — ${db.funcionarios.filter(f=>f.setor===s).length} funcionário(s)</li>`).join('')}</ul>`}
+function reportDocs(){reportContent.innerHTML=`<h2>Relatório de Documentos</h2><table><tr><th>Documento</th><th>Categoria</th><th>Responsável</th><th>Validade</th><th>Estado</th></tr>${db.documentos.map(x=>{let s=status(x.val);return `<tr><td>${esc(x.nome)}</td><td>${esc(x.cat)}</td><td>${esc(x.resp)}</td><td>${esc(x.val||'-')}</td><td>${s[0]}</td></tr>`}).join('')}</table>`}
+function reportFuncs(){reportContent.innerHTML=`<h2>Relatório de Funcionários</h2><table><tr><th>Nome</th><th>ID</th><th>Cargo</th><th>Setor</th><th>Telefone</th></tr>${db.funcionarios.map(x=>`<tr><td>${esc(x.nome)}</td><td>${esc(x.idfunc)}</td><td>${esc(x.cargo)}</td><td>${esc(x.setor)}</td><td>${esc(x.tel)}</td></tr>`).join('')}</table>`}
+renderAll();reportGeral();
+</script>
+</body>
+</html>
